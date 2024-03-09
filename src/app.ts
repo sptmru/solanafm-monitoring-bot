@@ -1,4 +1,5 @@
 import { config } from './infrastructure/config/config';
+import { logger } from './misc/Logger';
 import { SolanaFmApiService } from './services/solanafmapi.service';
 import TelegramBot from 'node-telegram-bot-api';
 
@@ -11,12 +12,14 @@ bot.on('message', msg => {
   const messageText = msg.text;
 
   if (messageText === '/stop') {
+    logger.debug('Monitoring stopped...');
     clearInterval(interval);
     interval = undefined;
   }
 
   if (messageText === '/start') {
     if (interval === undefined) {
+      logger.debug('Monitoring started...');
       interval = setInterval(async () => {
         const utcFrom = Math.floor(new Date().getTime() / 1000) - config.refreshTime;
         const transactions = await SolanaFmApiService.getFailedTransactionsForAccount(config.accountHash, {

@@ -25,6 +25,7 @@ export class SolanaFmApiService {
     account: string,
     params: SolanaFmApiParams
   ): Promise<SolanaFmApiTransaction[]> {
+    logger.debug(`Getting failed transactions...`);
     const transactionsResult = await this.getWalletOrAccountTransactions(account, params);
     return transactionsResult.result.data.filter(transaction => transaction.err !== null);
   }
