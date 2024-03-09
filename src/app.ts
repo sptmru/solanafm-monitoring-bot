@@ -18,7 +18,7 @@ bot.on('message', msg => {
   if (messageText === '/start') {
     if (interval === undefined) {
       interval = setInterval(async () => {
-        const utcFrom = Math.floor(new Date().getTime() / 1000) - 2;
+        const utcFrom = Math.floor(new Date().getTime() / 1000) - config.refreshTime;
         const transactions = await SolanaFmApiService.getFailedTransactionsForAccount(config.accountHash, {
           utcFrom,
         });
