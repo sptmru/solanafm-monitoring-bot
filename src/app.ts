@@ -1,15 +1,31 @@
+import { config } from './infrastructure/config/config';
 import { SolanaFmApiService } from './services/solanafmapi.service';
+import TelegramBot from 'node-telegram-bot-api';
 
-(async (): Promise<void> => {
-  // const utcFrom = Math.floor(new Date().getTime() / 1000);
-  const utcFrom = 1709900000;
-  const transactions = await SolanaFmApiService.getFailedTransactionsForAccount(
-    'Bofn4Ge9K9LogXzW2QU3XDwky3r93bC5heHSEK3TckgG',
-    {
-      utcFrom,
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let interval: any;
+const bot = new TelegramBot(config.telegramBotToken, { polling: true });
+
+bot.on('message', msg => {
+  const chatId = msg.chat.id;
+  const messageText = msg.text;
+
+  if (messageText === '/stop') {
+    clearInterval(interval);
+    interval = undefined;
+  }
+
+  if (messageText === '/start') {
+    if (interval === undefined) {
+      interval = setInterval(async () => {
+        const utcFrom = Math.floor(new Date().getTime() / 1000) - 2;
+        const transactions = await SolanaFmApiService.getFailedTransactionsForAccount(config.accountHash, {
+          utcFrom,
+        });
+        for (const transaction of transactions) {
+          await bot.sendMessage(chatId, `Failed transaction ${transaction.signature}`);
+        }
+      }, 2000);
     }
-  );
-  console.log(transactions);
-})()
-  .then(() => {})
-  .catch(() => {});
+  }
+});
