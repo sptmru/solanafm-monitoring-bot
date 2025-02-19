@@ -21,12 +21,17 @@ bot.on('message', msg => {
     if (interval === undefined) {
       logger.debug('Monitoring started...');
       interval = setInterval(async () => {
-        const utcFrom = Math.floor(new Date().getTime() / 1000) - config.refreshTime;
-        const transactions = await SolanaFmApiService.getFailedTransactionsForAccount(config.accountHash, {
-          utcFrom,
-        });
-        for (const transaction of transactions) {
-          await bot.sendMessage(chatId, `Failed transaction ${transaction.signature}`);
+        try {
+          // const utcFrom = Math.floor(new Date().getTime() / 1000) - config.refreshTime;
+          const utcFrom = 1709970000;
+          const transactions = await SolanaFmApiService.getFailedTransactionsForAccount(config.accountHash, {
+            utcFrom,
+          });
+          for (const transaction of transactions) {
+            await bot.sendMessage(chatId, `Failed transaction ${transaction.signature}`);
+          }
+        } catch (err) {
+          logger.error(err);
         }
       }, 2000);
     }
